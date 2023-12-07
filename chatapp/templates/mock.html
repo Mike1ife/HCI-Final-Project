@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>模擬面試</title>
+</head>
+
+<body>
+    <header>
+        <nav>導覽列
+            <ul>
+                <p>{{ username }}</p>
+                <a class="btn btn-lg btn-primary" href="{% url 'signout' %}" role="button">登出</a>
+                <a class="btn btn-lg btn-primary" href="{% url 'mockgpt' %}" role="button">進入面試</a>
+                <li><a href="/info/">推甄信息</a></li>
+                <li><a href="/identity/">個人資訊</a></li>
+            </ul>
+        </nav>
+    </header>
+</body>
+
+</html>

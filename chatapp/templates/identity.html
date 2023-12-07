@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>個人資訊</title>
+</head>
+
+<body>
+    <header>
+        <nav>導覽列
+            <ul>
+                <p>{{ username }}</p>
+                <a class="btn btn-lg btn-primary" href="{% url 'signout' %}" role="button">登出</a>
+                <li><a href="/info/">推甄信息</a></li>
+                <li><a href="/mock/">模擬面試</a></li>
+            </ul>
+        </nav>
+    </header>
+</body>
+
+</html>

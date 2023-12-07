@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>推甄信息</title>
+</head>
+
+<body>
+    <div id="content">
+        {% block content %}
+        <header>
+            <nav>導覽列
+                <ul>
+                    <p>{{ username }}</p>
+                    <a class="btn btn-lg btn-primary" href="{% url 'signout' %}" role="button">登出</a>
+                    <li><a href="/mock/">模擬面試</a></li>
+                    <li><a href="/identity/">個人資訊</a></li>
+                </ul>
+            </nav>
+        </header>
+        {% endblock %}
+    </div>
+</body>
+
+</html>
