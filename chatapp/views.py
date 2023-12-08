@@ -15,9 +15,12 @@ load_dotenv()
 # Create your views here.
 openai.api_key = os.getenv("API_KEY")
 
+app_name = "HCI Project"
+
 
 def index(request):
-    return render(request, "index.html")
+    context = {"app_name": app_name}
+    return render(request, "index.html", context)
 
 
 @login_required(login_url="signin")
@@ -42,19 +45,19 @@ def mockgpt(request):
 
 def info(request):
     username = request.user.username
-    context = {"username": username}
+    context = {"username": username, "app_name": app_name}
     return render(request, "info.html", context)
 
 
 def mock(request):
     username = request.user.username
-    context = {"username": username}
+    context = {"username": username, "app_name": app_name}
     return render(request, "mock.html", context)
 
 
 def identity(request):
     username = request.user.username
-    context = {"username": username}
+    context = {"username": username, "app_name": app_name}
     return render(request, "identity.html", context)
 
 
@@ -72,7 +75,7 @@ def signup(request):
             if user is not None:
                 login(request, user)
                 return redirect("info")
-    context = {"form": form}
+    context = {"form": form, "app_name": app_name}
     return render(request, "chatapp/signup.html", context)
 
 
@@ -92,7 +95,7 @@ def signin(request):
         else:
             err = "Invalid Credentials"
 
-    context = {"error": err}
+    context = {"error": err, "app_name": app_name}
     return render(request, "chatapp/signin.html", context)
 
 
