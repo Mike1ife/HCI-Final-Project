@@ -49,6 +49,24 @@ def info(request):
     return render(request, "info.html", context)
 
 
+def NTU(request):
+    username = request.user.username
+    context = {"username": username, "app_name": app_name}
+    return render(request, "NTU/NTU.html", context)
+
+
+def NYCU(request):
+    username = request.user.username
+    context = {"username": username, "app_name": app_name}
+    return render(request, "NYCU/NYCU.html", context)
+
+
+def NTHU(request):
+    username = request.user.username
+    context = {"username": username, "app_name": app_name}
+    return render(request, "NTHU/NTHU.html", context)
+
+
 def mock(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}

@@ -3,13 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>推甄信息</title>
+    <title>臺灣大學</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            overflow-x: hidden;
         }
 
         header {
@@ -49,23 +48,6 @@
 
         #content {
             padding-top: 0px;
-        }
-
-        /* Three image containers (use 25% for four, and 50% for two, etc) */
-        .row {
-            margin-top: 50px;
-            display: flex;
-        }
-
-        .column {
-            flex: 33.33%;
-            padding: 5px;
-        }
-
-        .column:nth-child(3) {
-            position: relative;
-            left: 100px;
-            /* Add margin to the right of the third column */
         }
 
         .btn {
@@ -120,7 +102,7 @@
         {% block content %}
         <header>
             <span id="web-name">{{ app_name }}</span>
-            <span id="app-name">推甄信息</span>
+            <span id="app-name">臺灣大學</span>
             <nav>
                 <ul>
                     <li id="user-info">Hello! {{ username }}</li>
@@ -133,26 +115,9 @@
             <a class="btn btn-mock" href="{% url 'mock' %}">模擬面試</a>
             <a class="btn btn-identity" href="{% url 'identity' %}">個人資訊</a>
         </div>
-        <div class="row">
-            <a href="{% url 'NTU' %}" class="column">
-                <div>
-                    <img src="https://branditechture.agency/brand-logos/wp-content/uploads/wpdm-cache/National-Taiwan-University-900x0.png"
-                        alt="NTU Logo" style="width:100%">
-                </div>
-            </a>
-            <a href="{% url 'NYCU' %}" class="column">
-                <div>
-                    <img src="https://cis.ncu.edu.tw/ApcourseSys/images/nycu.png" alt="NYCU logo" style="width:100%">
-                </div>
-            </a>
-            <a href="{% url 'NTHU' %}" class="column">
-                <div>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/NTHU_Round_Seal.svg/1024px-NTHU_Round_Seal.svg.png"
-                        alt="NTHU logo" style="width:70%">
-                </div>
-            </a>
+        <div class="page-links">
+            <a class="btn btn-info" href="{% url 'info' %}">重選學校</a>
         </div>
-
         {% endblock %}
     </div>
 </body>
