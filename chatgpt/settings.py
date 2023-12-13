@@ -121,7 +121,6 @@ STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [BASE_DIR/'chatapp'/'static']
 
-print(STATICFILES_DIRS)
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
