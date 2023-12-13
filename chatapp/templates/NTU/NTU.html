@@ -94,6 +94,51 @@
             color: #43583b;
             border-color: #43583b;
         }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin-left: 500px;
+        }
+
+        .btn {
+            margin-bottom: 10px;
+        }
+
+        .professor {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .professor img {
+            width: 150px;
+            height: auto;
+            margin-right: 15px;
+        }
+
+        .professor .info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .professor h2 {
+            margin: 0;
+        }
+
+        .professor .info a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .professor .info a:hover {
+            text-decoration: underline;
+        }
+
+        .professor p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 
@@ -117,6 +162,48 @@
         </div>
         <div class="page-links">
             <a class="btn btn-info" href="{% url 'info' %}">重選學校</a>
+        </div>
+        <div class="container">
+            <div class="professor">
+                <img src="https://csie.ntu.edu.tw/uploads/member_profile/avatar/63c0ffe208911a59987ce5b7/%E6%9E%97%E8%BB%92%E7%94%B0%E8%80%81%E5%B8%AB.jpg"
+                    alt="HT Lin">
+                <div class="info">
+                    <a href="{% url 'HT_Lin' %}">
+                        <h2>林軒田</h2>
+                    </a>
+                    <p>系所: 資訊工程學系</p>
+                    <p>學歷: 美國加州理工學院博士學位</p>
+                    <p>實驗室: Computational Learning Lab</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="professor">
+                <img src="https://csie.ntu.edu.tw/uploads/member_profile/avatar/63bd265c08911a59987ce091/%E5%BC%B5%E7%91%9E%E5%B3%B0%E8%80%81%E5%B8%AB.jpg"
+                    alt="Ruey-Feng Chang">
+                <div class="info">
+                    <a href="{% url 'Ruey_Feng_Chang' %}">
+                        <h2>張瑞峰</h2>
+                    </a>
+                    <p>系所: 資訊工程學系</p>
+                    <p>學歷: 國立清華大學資訊科學系博士學位</p>
+                    <p>實驗室: Computer-Aided Detection and Diagnosis Lab</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="professor">
+                <img src="https://csie.ntu.edu.tw/uploads/member_profile/avatar/63c1006108911a59987ce5d7/8746.jpg"
+                    alt="P Lin">
+                <div class="info">
+                    <a href="{% url 'P_Lin' %}">
+                        <h2>林風</h2>
+                    </a>
+                    <p>系所: 資訊工程學系</p>
+                    <p>學歷: 國立交大資工所博士學位</p>
+                    <p>實驗室: Mobile Communications Networking Lab</p>
+                </div>
+            </div>
         </div>
         {% endblock %}
     </div>
