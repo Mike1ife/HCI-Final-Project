@@ -25,7 +25,7 @@ default_history = [
 只使用繁體中文進行提問及回答
 你是一個HCI大學的教授 正在面試準備進入研究所的大學生。
 以學生的回答，在內心給出一個介於 0~100 的整數x 代表你對這名學生的評分，以 70 作為初始數值，並以 60 做為錄取標準，若學生的分數距離此標準過低，你也可以選擇提前結束這場面試。在任何回覆的最後面印出獨立的一行 "分數: x"。
-先請學生自我介紹
+無論如何 第一句話先請學生自我介紹
 以學生的科系、報考動機、進入研究所後的規劃等方面，制定問題以"嚴格的口吻"進行提問
 不要講太多無關問題的回答 一次以一個問題為主
 參考的問題方向如下 但盡量讓每個問題都問過 且不要問得太深入 
@@ -194,17 +194,20 @@ def signout(request):
     return redirect("signin")
 
 
-def ask_openai(message, user=None):
+def ask_openai(message, user=None, first=False):
 
     if user not in history:
         history[user] = copy.deepcopy(default_history)
-    print(str(user))
+    print("User: " + str(user))
     print(history[user])
     
     # Add message to history
-    history[user].append(
-        {"role": "user", "content":message}
-    )
+    if not first:
+        history[user].append(
+            {"role": "user", "content":message}
+        )
+
+    print("Message generating...")
 
     response = openai.ChatCompletion.create(
         model="gpt-4-0613",
@@ -217,18 +220,24 @@ def ask_openai(message, user=None):
         "role": response_message.role,
         "content":response_message.content
     })
+    print("Message generating complete!")
     print(history[user])
     return response_message.content
 
 
 def test(request):
+
     if request.method == "POST":
     # data = json.loads(request.body)
-    # message = data["msg"]
+    # message = data["msg"]   
         message = request.POST.get("prompt")
-        response = ask_openai(message, user=request.user)
+        response = ask_openai(message, user=request.user, first=(request.POST.get("first") == "true"))
     # QuestionAnswer.objects.create(user=request.user, question=message, answer=response)
     # return JsonResponse({"msg": message, "res": response})
         return JsonResponse({"response": response})
-    return render(request, "test.html")
+    else:
+        if request.user.is_authenticated:
+            history[request.user] = copy.deepcopy(default_history)
+            return render(request, "test.html")
+            # return render(request, "test.html", {'current_time': str(datetime.now()),})
     
