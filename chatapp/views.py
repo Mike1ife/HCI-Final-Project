@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import UserForm
+from .forms import UserForm, ResumeForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -151,25 +151,90 @@ def mock(request):
     return render(request, "mock.html", context)
 
 
+from django.contrib.auth.models import User
+from .models import UserProfile
+
+
 def identity(request):
     username = request.user.username
+    user = User.objects.get(username=username)
+    profile = UserProfile.objects.get(user=user)
 
     context = {
         "username": username,
         "app_name": app_name,
-        "research_area": "Good",
+        "research_area": profile.research_area,
+        "education": profile.education,
+        "key_skills": profile.key_skills,
+        "work_experiences": profile.work_experiences,
+        "relevant_coursework": profile.relevant_coursework,
+        "extracurricular": profile.extracurricular,
+        "language_skills": profile.language_skills,
     }
     return render(request, "identity.html", context)
 
 
+@login_required(login_url="signin")
+def edit_resume(request):
+    username = request.user.username
+    user = User.objects.get(username=username)
+    profile = UserProfile.objects.get(user=user)
+
+    if request.method == "POST":
+        form = ResumeForm(request.POST)
+
+        if form.is_valid():
+            # Access user information from the form data
+            research_area = form.cleaned_data["research_area"]
+            education = form.cleaned_data["education"]
+            key_skills = form.cleaned_data["key_skills"]
+            work_experiences = form.cleaned_data["work_experiences"]
+            relevant_coursework = form.cleaned_data["relevant_coursework"]
+            extracurricular = form.cleaned_data["extracurricular"]
+            language_skills = form.cleaned_data["language_skills"]
+
+            profile.research_area = research_area
+            profile.education = education
+            profile.key_skills = key_skills
+            profile.work_experiences = work_experiences
+            profile.relevant_coursework = relevant_coursework
+            profile.extracurricular = extracurricular
+            profile.language_skills = language_skills
+            profile.save()
+
+            return redirect("identity")
+    else:
+        initial = {
+            "research_area": profile.research_area,
+            "education": profile.education,
+            "key_skills": profile.key_skills,
+            "work_experiences": profile.work_experiences,
+            "relevant_coursework": profile.relevant_coursework,
+            "extracurricular": profile.extracurricular,
+            "language_skills": profile.language_skills,
+        }
+        if profile.research_area != "請輸入您的研究領域":
+            form = ResumeForm(initial)
+        else:
+            form = ResumeForm()
+
+    return render(request, "resume.html", {"form": form})
+
+
+from .models import UserProfile
+
+
 def signup(request):
-    if request.user.is_authenticated:
-        return redirect("info")
     form = UserForm()
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            user_profile = UserProfile.objects.get(user=user)
+            user_profile.research_area = request.POST.get("research_area")
+            # Set other additional attributes as needed
+            user_profile.save()
+
             username = request.POST["username"]
             password = request.POST["password1"]
             user = authenticate(request, username=username, password=password)
@@ -238,3 +303,8 @@ def test(request):
         # return JsonResponse({"msg": message, "res": response})
         return JsonResponse({"response": response})
     return render(request, "test.html")
+
+
+def my_view(request):
+    bio = request.user.profile.bio
+    avatar = request.user.profile.avatar
