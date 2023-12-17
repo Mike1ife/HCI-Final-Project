@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import UserForm
+from .forms import UserForm, ResumeForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -10,6 +10,7 @@ import json
 from dotenv import load_dotenv
 import os
 import copy
+
 load_dotenv()
 
 # Create your views here.
@@ -19,9 +20,8 @@ app_name = "HCI Project"
 
 default_history = [
     {
-        "role": "system", 
-        "content": 
-'''
+        "role": "system",
+        "content": """
 只使用繁體中文進行提問及回答
 你是一個HCI大學的教授 正在面試準備進入研究所的大學生。
 以學生的回答，在內心給出一個介於 0~100 的整數x 代表你對這名學生的評分，以 70 作為初始數值，並以 60 做為錄取標準，若學生的分數距離此標準過低，你也可以選擇提前結束這場面試。在任何回覆的最後面印出獨立的一行 "分數: x"。
@@ -35,7 +35,7 @@ default_history = [
 4. 如果沒有考上你要怎麼辦? 是不是有打算出國念或工作
 5. 在研究所二年內，想得到些什麼?
 6. 對本所了解多少？你覺得本校的優點在哪？簡述系上老師的特色      
-'''
+""",
     },
 ]
 
@@ -78,6 +78,7 @@ def NTU(request):
     context = {"username": username, "app_name": app_name}
     return render(request, "NTU/NTU.html", context)
 
+
 def HT_Lin(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
@@ -95,10 +96,12 @@ def P_Lin(request):
     context = {"username": username, "app_name": app_name}
     return render(request, "NTU/P_Lin.html", context)
 
+
 def NYCU(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
     return render(request, "NYCU/NYCU.html", context)
+
 
 def Lan_Da_Van(request):
     username = request.user.username
@@ -117,10 +120,12 @@ def Jung_Hong_Chuang(request):
     context = {"username": username, "app_name": app_name}
     return render(request, "NYCU/Jung_Hong_Chuang.html", context)
 
+
 def NTHU(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
     return render(request, "NTHU/NTHU.html", context)
+
 
 def Che_Rung_Lee(request):
     username = request.user.username
@@ -139,26 +144,97 @@ def Ching_Te_Chiu(request):
     context = {"username": username, "app_name": app_name}
     return render(request, "NTHU/Ching_Te_Chiu.html", context)
 
+
 def mock(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
     return render(request, "mock.html", context)
 
 
+from django.contrib.auth.models import User
+from .models import UserProfile
+
+
 def identity(request):
     username = request.user.username
-    context = {"username": username, "app_name": app_name}
+    user = User.objects.get(username=username)
+    profile = UserProfile.objects.get(user=user)
+
+    context = {
+        "username": username,
+        "app_name": app_name,
+        "research_area": profile.research_area,
+        "education": profile.education,
+        "key_skills": profile.key_skills,
+        "work_experiences": profile.work_experiences,
+        "relevant_coursework": profile.relevant_coursework,
+        "extracurricular": profile.extracurricular,
+        "language_skills": profile.language_skills,
+    }
     return render(request, "identity.html", context)
 
 
+@login_required(login_url="signin")
+def edit_resume(request):
+    username = request.user.username
+    user = User.objects.get(username=username)
+    profile = UserProfile.objects.get(user=user)
+
+    if request.method == "POST":
+        form = ResumeForm(request.POST)
+
+        if form.is_valid():
+            # Access user information from the form data
+            research_area = form.cleaned_data["research_area"]
+            education = form.cleaned_data["education"]
+            key_skills = form.cleaned_data["key_skills"]
+            work_experiences = form.cleaned_data["work_experiences"]
+            relevant_coursework = form.cleaned_data["relevant_coursework"]
+            extracurricular = form.cleaned_data["extracurricular"]
+            language_skills = form.cleaned_data["language_skills"]
+
+            profile.research_area = research_area
+            profile.education = education
+            profile.key_skills = key_skills
+            profile.work_experiences = work_experiences
+            profile.relevant_coursework = relevant_coursework
+            profile.extracurricular = extracurricular
+            profile.language_skills = language_skills
+            profile.save()
+
+            return redirect("identity")
+    else:
+        initial = {
+            "research_area": profile.research_area,
+            "education": profile.education,
+            "key_skills": profile.key_skills,
+            "work_experiences": profile.work_experiences,
+            "relevant_coursework": profile.relevant_coursework,
+            "extracurricular": profile.extracurricular,
+            "language_skills": profile.language_skills,
+        }
+        if profile.research_area != "請輸入您的研究領域":
+            form = ResumeForm(initial)
+        else:
+            form = ResumeForm()
+
+    return render(request, "resume.html", {"form": form})
+
+
+from .models import UserProfile
+
+
 def signup(request):
-    if request.user.is_authenticated:
-        return redirect("info")
     form = UserForm()
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            user_profile = UserProfile.objects.get(user=user)
+            user_profile.research_area = request.POST.get("research_area")
+            # Set other additional attributes as needed
+            user_profile.save()
+
             username = request.POST["username"]
             password = request.POST["password1"]
             user = authenticate(request, username=username, password=password)
@@ -195,40 +271,40 @@ def signout(request):
 
 
 def ask_openai(message, user=None):
-
     if user not in history:
         history[user] = copy.deepcopy(default_history)
     print(str(user))
     print(history[user])
-    
+
     # Add message to history
-    history[user].append(
-        {"role": "user", "content":message}
-    )
+    history[user].append({"role": "user", "content": message})
 
     response = openai.ChatCompletion.create(
         model="gpt-4-0613",
-        messages=history[user],   
+        messages=history[user],
     )
-    
+
     response_message = response.choices[0].message
-    
-    history[user].append({
-        "role": response_message.role,
-        "content":response_message.content
-    })
+
+    history[user].append(
+        {"role": response_message.role, "content": response_message.content}
+    )
     print(history[user])
     return response_message.content
 
 
 def test(request):
     if request.method == "POST":
-    # data = json.loads(request.body)
-    # message = data["msg"]
+        # data = json.loads(request.body)
+        # message = data["msg"]
         message = request.POST.get("prompt")
         response = ask_openai(message, user=request.user)
-    # QuestionAnswer.objects.create(user=request.user, question=message, answer=response)
-    # return JsonResponse({"msg": message, "res": response})
+        # QuestionAnswer.objects.create(user=request.user, question=message, answer=response)
+        # return JsonResponse({"msg": message, "res": response})
         return JsonResponse({"response": response})
     return render(request, "test.html")
-    
+
+
+def my_view(request):
+    bio = request.user.profile.bio
+    avatar = request.user.profile.avatar
