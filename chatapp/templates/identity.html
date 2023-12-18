@@ -38,6 +38,42 @@
             /* Adjust the font size as needed */
         }
 
+        #user-name {
+            margin-left: 30px;
+            margin-top: 50px;
+            font-size: 60px;
+            /* Adjust the font size as needed */
+        }
+
+        #research-area {
+            margin-left: 30px;
+            font-size: 20px;
+            /* Adjust the font size as needed */
+        }
+
+        #resume-info {
+            position: absolute;
+            width: 800px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            top: 20%;
+            /* Adjust the top position as needed */
+            left: 50%;
+            /* Center horizontally within the containing element */
+            transform: translateX(-50%);
+            /* Center horizontally using translate */
+        }
+        #resume-info div {
+            margin-bottom: 30px;
+            text-align: left;
+            /* Adjust the margin between lines as needed */
+        }
+        #resume-info h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
         nav ul {
             list-style: none;
             margin: 0;
@@ -120,8 +156,42 @@
             <a class="btn btn-mock" href="{% url 'mock' %}">模擬面試</a>
             <a class="btn btn-identity disabled" href="{% url 'identity' %}">個人資訊</a>
         </div>
+        <div id="user-name">{{ username }}</div>
+        <!-- Text field for user information -->
+        <div>
+            <label id="research-area">計劃研究方向: {{research_area}}</label>
+        </div>
+
+        <div>
+            <div id="resume-info">
+                <h1>履歷表</h1>
+                <div>
+                    <strong>最高學歷:</strong> {{ education }}
+                </div>
+                <div>
+                    <strong>專業技能:</strong> {{ key_skills|linebreaksbr|default:"None" }}
+                </div>
+                <div>
+                    <strong>工作經驗:</strong> {{ work_experiences }}
+                </div>
+                <div>
+                    <strong>相關課程:</strong> {{ relevant_coursework }}
+                </div>
+                <div>
+                    <strong>課外活動:</strong> {{ extracurricular }}
+                </div>
+                <div>
+                    <strong>外語能力:</strong> {{ language_skills }}
+                </div>
+                <div class="page-links">
+                    <a class="btn-edit" href="{% url 'edit' %}">編輯履歷</a>
+                </div>
+            </div>
+        </div>
         {% endblock %}
     </div>
+
+
 </body>
 
 </html>
