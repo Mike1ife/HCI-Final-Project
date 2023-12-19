@@ -11,9 +11,11 @@ import json
 from dotenv import load_dotenv
 import os
 import copy
-
+from bs4 import BeautifulSoup
+import requests
+# from prof import NTU_prof
+from multiprocessing import Pool
 load_dotenv()
-
 
 # Create your views here.
 openai.api_key = os.getenv("API_KEY")
@@ -44,6 +46,16 @@ default_history = [
 
 history = {}
 
+def NTU_parse(): 
+    pass
+
+def NYCU_parse(): 
+    pass
+
+def NTHU_parse(): 
+    pass
+
+schoolDict = {"NTU":NTU_parse, "NYCU":NYCU_parse, "NTHU":NTHU_parse} 
 
 def index(request):
     context = {"app_name": app_name}
@@ -69,11 +81,42 @@ def mockgpt(request):
 
     return render(request, "chatapp/mockgpt.html", context)
 
-
+@login_required(login_url="signin")
 def info(request):
+    school = request.GET.get('s', '') 
+    profname = request.GET.get('n', '')
     username = request.user.username
     context = {"username": username, "app_name": app_name}
-    return render(request, "info.html", context)
+    # return render(request, "info.html", context)
+    if school == '' or school not in schoolDict:
+        return render(request, "info.html", context)
+    else:
+        profs = schoolDict[school]() # return a dict of profs
+        if profname == '' or profname not in profs:
+            # show profs
+            return
+        else:
+            # show one prof
+            return
+
+def NTU_parse():
+    
+    url = "https://csie.ntu.edu.tw/zh_tw/member/Faculty"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = soup.find_all('span', class_="i-member-value member-data-value-name")
+    for link in links:
+        try:
+            name = link.find('a').get('title').split('(')[1][:-1]
+        except:
+            name = link.find('a').get('title').split('（')[1][:-1]
+        url = "https://csie.ntu.edu.tw" + link.find('a').get('href')
+        
+    return 
+def NYCU_parse():
+    return
+def NTHU_parse():
+    return
 
 
 def NTU(request):
@@ -92,55 +135,54 @@ def Ruey_Feng_Chang(request):
     context = {"username": username, "app_name": app_name}
     return render(request, "NTU/Ruey_Feng_Chang.html", context)
 
-
 def P_Lin(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
     return render(request, "NTU/P_Lin.html", context)
 
-def NYCU(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NYCU/NYCU.html", context)
+# def NYCU(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NYCU/NYCU.html", context)
 
-def Lan_Da_Van(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NYCU/Lan_Da_Van.html", context)
-
-
-def Yen_Yu_Lin(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NYCU/Yen_Yu_Lin.html", context)
+# def Lan_Da_Van(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NYCU/Lan_Da_Van.html", context)
 
 
-def Jung_Hong_Chuang(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NYCU/Jung_Hong_Chuang.html", context)
-
-def NTHU(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTHU/NTHU.html", context)
-
-def Che_Rung_Lee(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTHU/Che_Rung_Lee.html", context)
+# def Yen_Yu_Lin(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NYCU/Yen_Yu_Lin.html", context)
 
 
-def Shang_Hong_Lai(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTHU/Shang_Hong_Lai.html", context)
+# def Jung_Hong_Chuang(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NYCU/Jung_Hong_Chuang.html", context)
+
+# def NTHU(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NTHU/NTHU.html", context)
+
+# def Che_Rung_Lee(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NTHU/Che_Rung_Lee.html", context)
 
 
-def Ching_Te_Chiu(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTHU/Ching_Te_Chiu.html", context)
+# def Shang_Hong_Lai(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NTHU/Shang_Hong_Lai.html", context)
+
+
+# def Ching_Te_Chiu(request):
+#     username = request.user.username
+#     context = {"username": username, "app_name": app_name}
+#     return render(request, "NTHU/Ching_Te_Chiu.html", context)
 
 def mock(request):
     username = request.user.username
@@ -159,7 +201,6 @@ def identity(request):
         "app_name": app_name,
         "app_name": app_name,
         "research_area": profile.research_area,
-        "research_area": "Good",
         "education": profile.education,
         "key_skills": profile.key_skills,
         "work_experiences": profile.work_experiences,
