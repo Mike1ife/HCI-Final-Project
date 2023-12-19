@@ -4,31 +4,15 @@ from django.contrib.auth.models import User
 
 
 class UserForm(UserCreationForm):
-    username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Enter username"}
-        )
-    )
-    email = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Enter email-address"}
-        )
-    )
-    password1 = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Enter password"}
-        )
-    )
-    password2 = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "confirm password"}
-        )
-    )
+
+    username = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control", "placeholder":"Enter username"}))
+    email = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control", "placeholder":"Enter email-address"}))
+    password1 = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control", "placeholder":"Enter password", "type":"password"}))
+    password2 = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control", "placeholder":"confirm password", "type":"password"}))
 
     class Meta:
         model = User
-        fields = ["username", "email", "password1", "password2"]
-
+        fields = ['username', 'email', 'password1', 'password2']
 
 class ResumeForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -116,3 +100,4 @@ class ResumeForm(forms.Form):
             }
         ),
     )
+
