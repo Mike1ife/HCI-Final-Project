@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>臺灣大學</title>
+    <title>{{ school }}</title>
     <style>
         .grid {
           display: grid; 
@@ -169,7 +169,7 @@
         {% block content %}
         <header>
             <span id="web-name">{{ app_name }}</span>
-            <span id="app-name">臺灣大學</span>
+            <span id="app-name">{{ school }}</span>
             <nav>
                 <ul>
                     <li id="user-info">Hello! {{ username }}</li>
@@ -206,7 +206,7 @@
                 <div class="professor">
                     <img src= "{{ prof.imageurl }}">
                     <div class="info">
-                        <a href="/info?s=NTU&?n={{prof.ename}}">
+                        <a href="/info?s=NTU&n={{prof.ename}}">
                             <h2> {{ prof.cname }} </h2>
                         </a>
                         <p>系所: {{ prof.dept }} </p>

@@ -4,13 +4,16 @@ import pprint
 from base64 import b64decode
 from tqdm import tqdm
 import multiprocessing
+import sys
+import time
 
 class professor:
     def __init__(self):    
         if type(self) is professor:
             raise NotImplementedError("Subclasses must implement this method")
         self.cname = ""
-        self.ename = ""        
+        self.ename = ""  
+        self.ename_strip = ""      
         self.dept = ""
         self.lab = ""
         self.laburl = ""
@@ -39,8 +42,8 @@ class NTU_prof(professor):
         except:
             self.cname = name.split('（')[0]
             self.ename = name.split('（')[1][:-1]
-
-        self.dept = "資工系"
+        self.ename_strip = self.ename.replace(" ", "-").replace(".", "-")
+        self.dept = "資訊工程學系"
 
         try:
             lab_element = soup.find('td', class_='member-data-value-8').find('a')
@@ -59,12 +62,24 @@ class NTU_prof(professor):
         email_raw = soup.find('td', class_='member-data-value-email').find('script').get_text(strip=True)
         email_b64 = email_raw.split("atob(\"")[1].split("\"")[0]
         self.email = b64decode(email_b64).decode("UTF-8")
-
+    def to_dict(self):        
+        return {
+            'url': self.url,
+            'cname': self.cname, 
+            'ename': self.ename,
+            'ename_strip': self.ename_strip, 
+            'dept': self.dept, 
+            'lab': self.lab, 
+            'laburl': self.laburl,
+            'research': self.research, 
+            'imageurl': self.imageurl,
+            'email': self.email}
         # super().print()
         # with open("test.txt", "w", encoding="utf-8") as file:
         #     file.write(lab)
             
-def worker_func(profs, link):
+def worker_func(data):
+    profs, link = data
     try:
         name = link.find('a').get('title').split('(')[1][:-1]
     except:
@@ -73,17 +88,19 @@ def worker_func(profs, link):
     profs[name] = NTU_prof(url)
 
 def main():
-    
+    sys.setrecursionlimit(25000)
     url = "https://csie.ntu.edu.tw/zh_tw/member/Faculty"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
     links = soup.find_all('span', class_="i-member-value member-data-value-name")
     manager = multiprocessing.Manager()
     shared_dict = manager.dict()
-    with multiprocessing.Pool(8) as pool:
+
+    with multiprocessing.Pool(len(links)) as pool:
         pool.map(worker_func, [(shared_dict, link) for link in links])
+
     for i in shared_dict:
-        print(i, shared_dict[i])
+        print(shared_dict[i].ename)
 
 
 if __name__ == '__main__':

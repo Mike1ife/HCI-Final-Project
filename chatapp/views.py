@@ -13,8 +13,9 @@ import os
 import copy
 from bs4 import BeautifulSoup
 import requests
-# from prof import NTU_prof
-from multiprocessing import Pool
+from .prof import NTU_prof
+import multiprocessing
+import sys
 load_dotenv()
 
 # Create your views here.
@@ -45,17 +46,6 @@ default_history = [
 
 history = {}
 
-def NTU_parse(): 
-    pass
-
-def NYCU_parse(): 
-    pass
-
-def NTHU_parse(): 
-    pass
-
-schoolDict = {"NTU":NTU_parse, "NYCU":NYCU_parse, "NTHU":NTHU_parse} 
-
 def index(request):
     context = {"app_name": app_name}
     return render(request, "index.html", context)
@@ -80,42 +70,71 @@ def mockgpt(request):
 
     return render(request, "chatapp/mockgpt.html", context)
 
-@login_required(login_url="signin")
-def info(request):
-    school = request.GET.get('s', '') 
-    profname = request.GET.get('n', '')
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    # return render(request, "info.html", context)
-    if school == '' or school not in schoolDict:
-        return render(request, "info.html", context)
-    else:
-        profs = schoolDict[school]() # return a dict of profs
-        if profname == '' or profname not in profs:
-            # show profs
-            return
-        else:
-            # show one prof
-            return
 
-def NTU_parse():
-    
-    url = "https://csie.ntu.edu.tw/zh_tw/member/Faculty"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    links = soup.find_all('span', class_="i-member-value member-data-value-name")
-    for link in links:
+def worker_func(data):
+        profs, link = data
         try:
             name = link.find('a').get('title').split('(')[1][:-1]
         except:
             name = link.find('a').get('title').split('（')[1][:-1]
         url = "https://csie.ntu.edu.tw" + link.find('a').get('href')
-        
-    return 
+        profs[name] = NTU_prof(url)
+
+def NTU_parse():    
+    sys.setrecursionlimit(25000)
+    url = "https://csie.ntu.edu.tw/zh_tw/member/Faculty"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = soup.find_all('span', class_="i-member-value member-data-value-name")
+    manager = multiprocessing.Manager()
+    shared_dict = manager.dict()
+
+    with multiprocessing.Pool(len(links)) as pool:
+        pool.map(worker_func, [(shared_dict, link) for link in links])
+
+    return dict(shared_dict)
+
 def NYCU_parse():
     return
 def NTHU_parse():
     return
+
+schoolDict = {"NTU":NTU_parse, "NYCU":NYCU_parse, "NTHU":NTHU_parse} 
+
+@login_required(login_url="signin")
+def info(request):
+    school = request.GET.get('s', '') 
+    profname = request.GET.get('n', '')
+    username = request.user.username    
+    # return render(request, "info.html", context)
+    if school == '' or school not in schoolDict:
+        context = {"username": username, "app_name": app_name}
+        return render(request, "info.html", context)
+    else:        
+        profs = schoolDict[school]() # return a dict of profs    
+        prof_list = [prof.to_dict() for prof in profs.values()]
+        prof_list.sort(key=lambda x: x['cname'], reverse=True)
+        cschool = ""
+        if school == "NTU":
+            cschool = "台灣大學"
+        elif school == "NYCU":
+            cschool = "陽明交通大學"
+        else:
+            cschool = "清華大學"
+        prof_found = any(p.get('ename_strip') == profname for p in prof_list)
+        if profname == '' or not prof_found:
+            context = {"username": username, "app_name": app_name, "school": cschool, 'profs': prof_list}
+            return render(request, 'school.html', context)
+        else:
+            prof_info = None
+            for prof in prof_list:
+                if prof['ename_strip'] == profname:
+                    prof_info = prof
+                    break
+            print(cschool)
+            context = {"username": username, "app_name": app_name, "school": school, 'prof': prof_info}
+            return render(request, 'P_Lin.html', context)
+
 
 
 def NTU(request):
@@ -374,7 +393,7 @@ def ask_openai(message, user=None, first=False):
     print("Message generating...")
 
     response = openai.ChatCompletion.create(
-        model="gpt-4-0613",
+        model="gpt-4",
         messages=history[user],
     )
 
