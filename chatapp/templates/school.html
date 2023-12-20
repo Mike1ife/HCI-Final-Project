@@ -169,7 +169,7 @@
         {% block content %}
         <header>
             <span id="web-name">{{ app_name }}</span>
-            <span id="app-name">{{ school }}</span>
+            <span id="app-name">{{ cschool }}</span>
             <nav>
                 <ul>
                     <li id="user-info">Hello! {{ username }}</li>
@@ -186,35 +186,25 @@
             <a class="btn btn-info" href="{% url 'info' %}">重選學校</a>
         </div>
 
-        
-        <div class="container">
-            <div class="professor">
-                <img src="https://csie.ntu.edu.tw/uploads/member_profile/avatar/63c1006108911a59987ce5d7/8746.jpg"
-                    alt="P Lin">
-                <div class="info">
-                    <a href="{% url 'P_Lin' %}">
-                        <h2>林風</h2>
-                    </a>
-                    <p>系所: 資訊工程學系</p>
-                    <p>學歷: 國立交大資工所博士學位</p>
-                    <p>實驗室: Mobile Communications Networking Lab</p>
-                </div>
-            </div>
-        </div>
         <div class="grid">
             {% for prof in profs %}
                 <div class="professor">
                     <img src= "{{ prof.imageurl }}">
                     <div class="info">
-                        <a href="/info?s=NTU&n={{prof.ename}}">
+                        <a href="/info?s={{ school }}&n={{prof.ename_strip}}">
                             <h2> {{ prof.cname }} </h2>
                         </a>
-                        <p>系所: {{ prof.dept }} </p>
-                        <p>email: {{ prof.email }} </p>
-                        <p>研究專長:
-                            {% for res in prof.research %} 
-                                {{ res }}{% if not forloop.last %}、{% endif %}
-                            {% endfor %}
+                        <p>
+                            <span class="dept">系所: </span>
+                            <span class="dept">{{ prof.dept }}</span>
+                        </p>
+                        <p>
+                            <span class="email">email: </span>
+                            <span class="email">{{ prof.email }}</span>
+                        </p>
+                        <p>
+                            <span class="research">研究專長: </span>
+                            <span class="research">{% for res in prof.research %}{{ res }}{% if not forloop.last %}、{% endif %}{% endfor %}</span>
                         </p>
                     </div>
                 </div>

@@ -7,13 +7,12 @@ from django.http import JsonResponse
 from datetime import date, timedelta
 from .models import QuestionAnswer, UserProfile
 import openai
-import json
 from dotenv import load_dotenv
 import os
 import copy
 from bs4 import BeautifulSoup
 import requests
-from .prof import NTU_prof
+from .prof import NTU_prof, NYCU_prof, NTHU_prof
 import multiprocessing
 import sys
 load_dotenv()
@@ -71,14 +70,20 @@ def mockgpt(request):
     return render(request, "chatapp/mockgpt.html", context)
 
 
-def worker_func(data):
-        profs, link = data
-        try:
-            name = link.find('a').get('title').split('(')[1][:-1]
-        except:
-            name = link.find('a').get('title').split('（')[1][:-1]
-        url = "https://csie.ntu.edu.tw" + link.find('a').get('href')
-        profs[name] = NTU_prof(url)
+def NTU_worker(data):
+    profs, link = data
+    try:
+        name = link.find('a').get('title').split('(')[1][:-1]
+    except:
+        name = link.find('a').get('title').split('（')[1][:-1]
+    url = "https://csie.ntu.edu.tw" + link.find('a').get('href')
+    profs[name] = NTU_prof(url)
+
+def NYCU_worker(data):
+    profs, member = data
+    name = member.find('h2').find('small').get_text(strip=True)
+    url = member.get('href')
+    profs[name] = NYCU_prof(url)
 
 def NTU_parse():    
     sys.setrecursionlimit(25000)
@@ -90,14 +95,35 @@ def NTU_parse():
     shared_dict = manager.dict()
 
     with multiprocessing.Pool(len(links)) as pool:
-        pool.map(worker_func, [(shared_dict, link) for link in links])
+        pool.map(NTU_worker, [(shared_dict, link) for link in links])
 
     return dict(shared_dict)
 
 def NYCU_parse():
-    return
+    sys.setrecursionlimit(25000)
+    url = "https://www.cs.nycu.edu.tw/members/prof"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    members = soup.find_all('a', class_='card-image')
+    manager = multiprocessing.Manager()
+    shared_dict = manager.dict()
+
+    with multiprocessing.Pool(len(members)) as pool:
+        pool.map(NYCU_worker, [(shared_dict, member) for member in members])
+    return dict(shared_dict)
+
 def NTHU_parse():
-    return
+    prof_dict = {}
+    nbrs = ["1107", "461", "429", "1108", "430"]
+    for nbr in nbrs:
+        url = "https://dcs.site.nthu.edu.tw/app/index.php?Action=mobileloadmod&Type=mobile_rcg_mstr&Nbr=" + nbr
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        profs = soup.find_all("div", class_="meditor")
+        for prof in profs:
+            prof_info = NTHU_prof(url, prof)
+            prof_dict[prof_info.ename_strip] = prof_info
+    return prof_dict
 
 schoolDict = {"NTU":NTU_parse, "NYCU":NYCU_parse, "NTHU":NTHU_parse} 
 
@@ -114,6 +140,9 @@ def info(request):
         profs = schoolDict[school]() # return a dict of profs    
         prof_list = [prof.to_dict() for prof in profs.values()]
         prof_list.sort(key=lambda x: x['cname'], reverse=True)
+
+        # for p in prof_list:
+        #     print(p['research'])
         cschool = ""
         if school == "NTU":
             cschool = "台灣大學"
@@ -123,7 +152,7 @@ def info(request):
             cschool = "清華大學"
         prof_found = any(p.get('ename_strip') == profname for p in prof_list)
         if profname == '' or not prof_found:
-            context = {"username": username, "app_name": app_name, "school": cschool, 'profs': prof_list}
+            context = {"username": username, "app_name": app_name, "cschool": cschool, 'school': school, 'profs': prof_list}
             return render(request, 'school.html', context)
         else:
             prof_info = None
@@ -131,33 +160,8 @@ def info(request):
                 if prof['ename_strip'] == profname:
                     prof_info = prof
                     break
-            print(cschool)
-            context = {"username": username, "app_name": app_name, "school": school, 'prof': prof_info}
-            return render(request, 'P_Lin.html', context)
-
-
-
-def NTU(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTU/NTU.html", context)
-
-
-def HT_Lin(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTU/HT_Lin.html", context)
-
-
-def Ruey_Feng_Chang(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTU/Ruey_Feng_Chang.html", context)
-
-def P_Lin(request):
-    username = request.user.username
-    context = {"username": username, "app_name": app_name}
-    return render(request, "NTU/P_Lin.html", context)
+            context = {"username": username, "app_name": app_name, "school": cschool, 'prof': prof_info}
+            return render(request, 'prof.html', context)
 
 # def NYCU(request):
 #     username = request.user.username
