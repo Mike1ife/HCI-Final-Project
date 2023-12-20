@@ -163,52 +163,6 @@ def info(request):
             context = {"username": username, "app_name": app_name, "school": cschool, 'prof': prof_info}
             return render(request, 'prof.html', context)
 
-# def NYCU(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NYCU/NYCU.html", context)
-
-# def Lan_Da_Van(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NYCU/Lan_Da_Van.html", context)
-
-
-
-# def Yen_Yu_Lin(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NYCU/Yen_Yu_Lin.html", context)
-
-
-# def Jung_Hong_Chuang(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NYCU/Jung_Hong_Chuang.html", context)
-
-# def NTHU(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NTHU/NTHU.html", context)
-
-# def Che_Rung_Lee(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NTHU/Che_Rung_Lee.html", context)
-
-
-# def Shang_Hong_Lai(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NTHU/Shang_Hong_Lai.html", context)
-
-
-# def Ching_Te_Chiu(request):
-#     username = request.user.username
-#     context = {"username": username, "app_name": app_name}
-#     return render(request, "NTHU/Ching_Te_Chiu.html", context)
-
-
 def mock(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
