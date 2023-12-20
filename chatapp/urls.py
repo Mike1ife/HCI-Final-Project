@@ -23,6 +23,7 @@ urlpatterns = [
     path("info/NTHU/Ching_Te_Chiu", views.Ching_Te_Chiu, name="Ching_Te_Chiu"),
     path("mock/", views.mock, name="mock"),
     path("mock/test", views.test, name="test"),
+    path("mock/avatar", views.avatar, name="avatar"),
     path("identity/", views.identity, name="identity"),
     path("identity/edit_resume", views.edit_resume, name="edit"),
 ]

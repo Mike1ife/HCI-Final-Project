@@ -178,6 +178,7 @@ def identity(request):
     }
     return render(request, "identity.html", context)
 
+
 @login_required(login_url="signin")
 def edit_resume(request):
     username = request.user.username
@@ -218,6 +219,7 @@ def edit_resume(request):
         else:
             form = ResumeForm()
     return render(request, "resume.html", {"form": form})
+
 
 @login_required(login_url="signin")
 def edit_resume(request):
@@ -270,7 +272,6 @@ from .models import UserProfile
 
 
 def signup(request):
-
     # if request.user.is_authenticated:
     #     return redirect("info")
 
@@ -319,7 +320,6 @@ def signout(request):
     return redirect("signin")
 
 
-
 def ask_openai(message, user=None, first=False):
     if user not in history:
         history[user] = copy.deepcopy(default_history)
@@ -329,9 +329,7 @@ def ask_openai(message, user=None, first=False):
     # Add message to history
 
     if not first:
-        history[user].append(
-            {"role": "user", "content":message}
-        )
+        history[user].append({"role": "user", "content": message})
 
     print("Message generating...")
 
@@ -341,23 +339,23 @@ def ask_openai(message, user=None, first=False):
     )
 
     response_message = response.choices[0].message
-    
-    history[user].append({
-        "role": response_message.role,
-        "content":response_message.content
-    })
+
+    history[user].append(
+        {"role": response_message.role, "content": response_message.content}
+    )
     print("Message generating complete!")
     print(history[user])
     return response_message.content
 
 
 def test(request):
-
     if request.method == "POST":
         # data = json.loads(request.body)
-        # message = data["msg"]   
+        # message = data["msg"]
         message = request.POST.get("prompt")
-        response = ask_openai(message, user=request.user, first=(request.POST.get("first") == "true"))
+        response = ask_openai(
+            message, user=request.user, first=(request.POST.get("first") == "true")
+        )
         # QuestionAnswer.objects.create(user=request.user, question=message, answer=response)
         # return JsonResponse({"msg": message, "res": response})
         return JsonResponse({"response": response})
@@ -366,8 +364,12 @@ def test(request):
             history[request.user] = copy.deepcopy(default_history)
             return render(request, "test.html")
             # return render(request, "test.html", {'current_time': str(datetime.now()),})
+
+
 def my_view(request):
- 
     bio = request.user.profile.bio
     avatar = request.user.profile.avatar
 
+
+def avatar(request):
+    return render(request, "avatar.html")
