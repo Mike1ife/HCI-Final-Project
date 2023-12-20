@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"
         integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
     <script>
-        window.onload = function (){
+        window.onload = function () {
 
             var csrftoken = Cookies.get('csrftoken');
             $.ajaxSetup({
@@ -23,7 +23,7 @@
             $.ajax({
                 url: '/mock/test',
                 type: 'POST',
-                data: {prompt: "123456", first: true},
+                data: { prompt: "123456", first: true },
                 dataType: 'json',
                 success: function (data) {
                     console.log(data)
@@ -59,7 +59,7 @@
                 $.ajax({
                     url: '/mock/test',
                     type: 'POST',
-                    data: { prompt: prompt, first : false },
+                    data: { prompt: prompt, first: false },
                     dataType: 'json',
                     success: function (data) {
                         console.log(data)
@@ -69,11 +69,34 @@
             });
         }); 
     </script>
+    <style>
+        .btn1 {
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+            /* Equal width for all buttons */
+        }
+
+        .btn-primary1 {
+            background-color: #ff0000;
+            color: #fff;
+            width: 10%;
+            margin-left: 80%;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container p-3">
-        <h3>ChatGPT Clone</h3>
+        <div class="d-grid gap-2">
+            <h3>ChatGPT Clone</h3>
+            <a class="btn1 btn-primary1" href="{% url 'mock' %}" role="button">退出會議</a>
+        </div>
         <div class="mb-3">
             <form method="post">
                 {% csrf_token %}
@@ -91,7 +114,6 @@
 
                     分數: 70</p> -->
             </div>
-
         </div>
     </div>
 </body>
