@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Conference History</title>
+</head>
+
+<body>
+    <h1>Conference History</h1>
+
+    {% if conference_history %}
+    <ul>
+        {% for interaction in conference_history %}
+        <li>
+            <strong>{{ username }}:</strong> {{ interaction.message }}<br>
+            <strong>教授:</strong> {{ interaction.response }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No conference history available.</p>
+    {% endif %}
+</body>
+
+</html>

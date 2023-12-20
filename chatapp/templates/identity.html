@@ -128,6 +128,17 @@
             transform: translateX(-50%);
         }
 
+        .btn-history {
+            text-align: center;
+            position: absolute;
+            width: 200px;
+            top: 44%;
+            margin-top: 20px;
+            /* Adjust the margin-top as needed to create a gap */
+            right: 75.4%;
+            transform: translateX(-50%);
+        }
+
         .page-links {
             margin-top: 20px;
             display: flex;
@@ -143,6 +154,7 @@
             margin: 0 10px;
             color: #007bff;
         }
+
 
         .page-links .btn-identity.disabled {
             pointer-events: none;
@@ -173,9 +185,11 @@
         <div id="user-name">{{ username }}</div>
         <!-- Text field for user information -->
         <div>
-            <label id="research-area">計劃研究方向: {{research_area}}</label>
+            <label id="research-area">計劃研究方向: {{ research_area }}</label>
         </div>
-
+        <div class="page-links">
+            <a class="btn-history" href="{% url 'mock_history' %}">推甄信息</a>
+        </div>
         <div>
             <div id="resume-info">
                 <h1>履歷表</h1>

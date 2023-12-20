@@ -39,8 +39,8 @@ class UserProfile(models.Model):
     language_skills = models.CharField(
         max_length=100, blank=True, null=True, default="請輸入您的外語能力"
     )
-
     # Add more fields as needed
+    conference_history = models.JSONField(default=list)
 
     def __str__(self):
         return self.user.username

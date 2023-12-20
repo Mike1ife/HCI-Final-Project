@@ -24,18 +24,12 @@ default_history = [
     {
         "role": "system",
         "content": """
-只使用繁體中文進行提問及回答
-你是一個HCI大學的教授 正在面試準備進入研究所的大學生。
-在所有問題結束後，以學生的回答為判斷，在內心給出一個介於 0~100 的整數x來代表你對這名學生的評分。
-以 40 作為初始數值，並以 60 做為錄取標準，請告知學生分數以及他是否被錄取。之後請針對學生的回答做出評價，說出哪裡可以做的更好以及如何改進。
-無論如何 第一句話先請學生自我介紹
-以學生的科系、報考動機、進入研究所後的規劃等方面，制定問題以"嚴格的口吻"進行提問
-不要講太多無關問題的回答 一次以一個問題為主
-參考的問題方向如下 但盡量讓每個問題都問過 且不要問得太深入 
-1. 你好 我是HCI大學的教授 可以請你簡單介紹一下你自己嗎?
-2. 想請問你為什麼選擇報考我們學校的研究所呢?
-3. 分享一下你的專題內容?
-4. 在研究所二年內，想得到些什麼?
+我想要進行研究所面試的練習，強化我的面試技巧。你將會是扮演面試我的教授。對話開始後請直接進入角色情境，不要說多餘的話。
+你需要設計模擬情境，讓我可以跟你進行一來一往的對話。你問一句後，要等我回答之後，你再問下一句。
+你將扮演這個情境的教授角色，我將扮演接受面試的學生，你會根據我的大學科系、報考動機、進入研究所後的規劃等方面，制定問題。
+一個問題接著一個問題的形式，用專業的口吻問我問題，直到你覺得，我的回應已經足夠讓你判斷我有沒有資格錄取。
+如果我在面試上表現的非常不錯，你還會出更專業的問題給我。過程當中你不需要解釋或者教學，只要扮演一個研究所教授即可。
+在你決定結束面試後，請依照我的表現做評分。滿分100分，60分及格。每個人的基本分是30分。
 """,
     },
 ]
@@ -163,11 +157,8 @@ def identity(request):
 
     context = {
         "username": username,
-        "username": username,
-        "app_name": app_name,
         "app_name": app_name,
         "research_area": profile.research_area,
-        "research_area": "Good",
         "education": profile.education,
         "key_skills": profile.key_skills,
         "work_experiences": profile.work_experiences,
@@ -349,20 +340,43 @@ def ask_openai(message, user=None, first=False):
 
 def test(request):
     if request.method == "POST":
-        # data = json.loads(request.body)
-        # message = data["msg"]
         message = request.POST.get("prompt")
         response = ask_openai(
             message, user=request.user, first=(request.POST.get("first") == "true")
         )
-        # QuestionAnswer.objects.create(user=request.user, question=message, answer=response)
-        # return JsonResponse({"msg": message, "res": response})
+
+        # Retrieve or create user profile
+        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        conference_history = user_profile.conference_history if not created else []
+
+        if request.POST.get("first") == "true":
+            conference_history = []
+            message = f"{request.user.username} 進入了面試會議"
+
+        # Update the conference history with the latest interaction
+        interaction = {"message": message, "response": response}
+        conference_history.append(interaction)
+
+        # Save the updated history back to the user profile
+        user_profile.conference_history = conference_history
+        user_profile.save()
+
         return JsonResponse({"response": response})
     else:
         if request.user.is_authenticated:
             history[request.user] = copy.deepcopy(default_history)
             return render(request, "test.html")
-            # return render(request, "test.html", {'current_time': str(datetime.now()),})
+
+
+def mock_history(request):
+    username = request.user.username
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    conference_history = user_profile.conference_history if not created else []
+    return render(
+        request,
+        "history.html",
+        {"username": username, "conference_history": conference_history},
+    )
 
 
 def my_view(request):

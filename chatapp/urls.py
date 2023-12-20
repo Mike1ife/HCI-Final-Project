@@ -25,5 +25,6 @@ urlpatterns = [
     path("mock/test", views.test, name="test"),
     path("mock/avatar", views.avatar, name="avatar"),
     path("identity/", views.identity, name="identity"),
+    path("identity/mock_history", views.mock_history, name="mock_history"),
     path("identity/edit_resume", views.edit_resume, name="edit"),
 ]
