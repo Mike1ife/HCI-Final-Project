@@ -257,8 +257,8 @@
             </div>
             <h2>教授評論</h2>
             <form id="feedback-form">
-                <label for="HT_Lin">留言:</label>
-                <textarea id="HT_Lin" name="HT_Lin" rows="4" cols="50"></textarea>
+                <label for="{{ prof.ename_strip }}">留言:</label>
+                <textarea id="{{ prof.ename_strip }}" name="{{ prof.ename_strip }}" rows="4" cols="50"></textarea>
                 <button type="button" onclick="submitFeedback()">提交</button>
             </form>
         </div>
@@ -266,7 +266,7 @@
             // Function to submit feedback
             function submitFeedback() {
                 // Get the feedback text from the textarea
-                var feedbackText = document.getElementById("HT_Lin").value;
+                var feedbackText = document.getElementById("{{ prof.ename_strip }}").value;
 
                 // Get the current user and timestamp
                 var currentUser = "{{ username }}"; // Use the correct variable here
@@ -280,19 +280,19 @@
                 };
 
                 // Get existing feedback from localStorage or initialize an empty array
-                var existingFeedback = JSON.parse(localStorage.getItem("HT_Lin")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Add new feedback to the array
                 existingFeedback.push(feedbackObject);
 
                 // Save the updated feedback array to localStorage
-                localStorage.setItem("HT_Lin", JSON.stringify(existingFeedback));
+                localStorage.setItem("{{ prof.ename_strip }}", JSON.stringify(existingFeedback));
 
                 // Update the displayed feedback on the page
                 displayFeedback(feedbackObject);
 
                 // Clear the textarea
-                document.getElementById("HT_Lin").value = "";
+                document.getElementById("{{ prof.ename_strip }}").value = "";
             }
 
             // Function to display feedback on the page
@@ -327,7 +327,7 @@
             // Function to load feedback from localStorage
             function loadFeedbackFromLocalStorage() {
                 // Get existing feedback from localStorage
-                var existingFeedback = JSON.parse(localStorage.getItem("HT_Lin")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Get the feedback-list element
                 var feedbackList = document.getElementById("feedback-list");
@@ -345,7 +345,7 @@
             // Function to delete feedback
             function deleteFeedback(element, feedbackObject) {
                 // Get existing feedback from localStorage
-                var existingFeedback = JSON.parse(localStorage.getItem("HT_Lin")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Find the index of the feedback object in the array
                 var index = existingFeedback.findIndex(function (feedback) {
@@ -362,7 +362,7 @@
                     element.remove();
                     existingFeedback.splice(index, 1);
                     // Save the updated feedback array to localStorage
-                    localStorage.setItem("HT_Lin", JSON.stringify(existingFeedback));
+                    localStorage.setItem("{{ prof.ename_strip }}", JSON.stringify(existingFeedback));
                 }
             }
             // Load existing feedback when the page loads
