@@ -10,8 +10,6 @@ urlpatterns = [
     path("info/", views.info, name="info"),
     path("mock/", views.mock, name="mock"),
     path("mock/test", views.test, name="test"),
-    path("mock/avatar", views.avatar, name="avatar"),
     path("identity/", views.identity, name="identity"),
     path("identity/edit_resume", views.edit_resume, name="edit"),
 ]
-

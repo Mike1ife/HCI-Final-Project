@@ -184,6 +184,14 @@ def info(request):
 def mock(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
+
+    if request.method == "POST":
+        audio_file = request.FILES["audioFile"]
+        # For example, save the file
+        with open("recorded_audio.wav", "wb") as destination:
+            for chunk in audio_file.chunks():
+                destination.write(chunk)
+
     return render(request, "mock.html", context)
 
 
@@ -394,15 +402,7 @@ def test(request):
         return JsonResponse({"response": response})
     else:
         if request.user.is_authenticated:
+            username = request.user.username
             history[request.user] = copy.deepcopy(default_history)
-            return render(request, "test.html")
+            return render(request, "test.html", context={"username": username})
             # return render(request, "test.html", {'current_time': str(datetime.now()),})
-
-
-def my_view(request):
-    bio = request.user.profile.bio
-    avatar = request.user.profile.avatar
-
-
-def avatar(request):
-    return render(request, "avatar.html")

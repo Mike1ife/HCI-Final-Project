@@ -100,6 +100,35 @@
             color: #43583b;
             border-color: #43583b;
         }
+
+        #container {
+            position: relative;
+        }
+
+        #centerImage {
+            width: 800px;
+            height: 400px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #circleButton {
+            position: relative;
+            top: 5px;
+            left: 48.2%;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 20px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        #circleButton.recording {
+            background-color: #ff0000;
+        }
+    </style>
     </style>
 </head>
 
@@ -122,11 +151,98 @@
             <a class="btn btn-identity" href="{% url 'identity' %}">個人資訊</a>
         </div>
         <div class="page-links">
-            <a class="btn btn-test" href="{% url 'avatar' %}">視訊面試</a>
-            <a class="btn btn-test" href="{% url 'test' %}">文字面試</a>
+            <a class="btn btn-test" href="{% url 'test' %}">文字面試 (Beta)</a>
         </div>
         {% endblock %}
     </div>
+    <div id="container">
+        <img id="centerImage"
+            src="https://www.smartlinkin.com.tw/data/Article/2928/Article_4d43b0ba16dd8b2e3595a93.jpg?v=20181126001"
+            alt="Centered Image">
+        <button id="circleButton">Record</button>
+        <audio id="recordedAudio" controls style="display:none;"></audio>
+    </div>
+    <form id="audioForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="audioFile" name="audioFile" style="display:none;">
+    </form>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var recordButton = document.getElementById('circleButton');
+            var isRecording = false;
+            var mediaRecorder;
+            var chunks = [];
+            var recordedAudioElement = document.getElementById('recordedAudio');
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = function (e) {
+                        if (e.data.size > 0) {
+                            chunks.push(e.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = function () {
+                        var audioBlob = new Blob(chunks, { type: 'audio/wav' });
+
+                        // Convert Blob to File
+                        var audioFile = new File([audioBlob], 'recorded_audio.wav');
+
+                        // Create a FormData object
+                        var formData = new FormData();
+                        formData.append('audioFile', audioFile);
+
+                        // Perform AJAX request
+                        var csrftoken = Cookies.get('csrftoken');
+                        $.ajaxSetup({
+                            headers: { 'X-CSRFToken': csrftoken }
+                        });
+                        $.ajax({
+                            url: '/mock/',
+                            type: 'POST',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function (data) {
+                                // Handle success, if needed
+                                console.log('Audio file uploaded successfully:', data);
+                            },
+                            error: function (xhr, status, error) {
+                                // Handle error, if needed
+                                console.error('Error uploading audio file:', error);
+                            }
+                        });
+
+                        chunks = [];
+                    };
+
+
+                    recordButton.addEventListener('click', function () {
+                        if (isRecording) {
+                            // Stop recording
+                            mediaRecorder.stop();
+                            recordButton.classList.remove('recording');
+                            recordButton.textContent = 'Record';
+                        } else {
+                            // Start recording
+                            mediaRecorder.start();
+                            recordButton.classList.add('recording');
+                            recordButton.textContent = 'Stop';
+                        }
+
+                        // Toggle recording state
+                        isRecording = !isRecording;
+                    });
+                })
+                .catch(function (err) {
+                    console.error('Error accessing microphone:', err);
+                });
+        });
+    </script>
 </body>
 
 </html>
