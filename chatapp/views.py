@@ -1,11 +1,11 @@
-import openai
 import os
-import copy
-import requests
-import multiprocessing
 import sys
-import speech_recognition as sr
+import copy
+import openai
+import requests
 import subprocess
+import multiprocessing
+import speech_recognition as sr
 
 from dotenv import load_dotenv
 from pydub import AudioSegment
@@ -32,6 +32,7 @@ load_dotenv()
 
 # Create your views here.
 api_key = os.getenv("API_KEY")
+client = openai.OpenAI(api_key=api_key)
 
 app_name = "HCI Project"
 
@@ -193,14 +194,6 @@ def info(request):
             return render(request, "prof.html", context)
 
 
-# speech to text function, which takes in a file name and returns the text
-def speech_to_text(file_name):
-    with sr.AudioFile(file_name) as source:
-        audio_data = r.record(source)
-        text = r.recognize_google(audio_data, language="zh-TW")
-        return text
-
-
 def webm2wav():
     command = [
         "ffmpeg",
@@ -237,21 +230,29 @@ def mock(request):
         if os.path.exists("temp_recording/user_recording.webm"):
             os.remove("temp_recording/user_recording.webm")
         default_storage.save("temp_recording/user_recording.webm", audio_file)
+
         webm2wav()
         wav2mp3()
         mp32wav()
-        speechtext = speech_to_text("temp_recording/mp32wav.wav")
-        response = ask_openai(
-            speechtext, user=request.user, first=(request.POST.get("first") == "true")
+
+        # Speech to Text
+        client = openai.OpenAI(api_key=api_key)
+        audio_file = open("temp_recording/mp32wav.wav", "rb")
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1", file=audio_file, response_format="text"
         )
 
-        client = openai.OpenAI(api_key=api_key)
+        # Feed ChatGPT
+        response = ask_openai(
+            transcript, user=request.user, first=(request.POST.get("first") == "true")
+        )
+
+        # Text to Speech
         response = client.audio.speech.create(
             model="tts-1",
             voice="echo",
             input=response,
         )
-
         if os.path.exists("temp_recording/response.mp3"):
             os.remove("temp_recording/response.mp3")
         response.stream_to_file("temp_recording/response.mp3")
@@ -401,7 +402,6 @@ def ask_openai(message, user=None, first=False):
 
     print("Message generating...")
 
-    client = openai.OpenAI(api_key=api_key)
     response = client.chat.completions.create(
         model="gpt-4",
         messages=history[user],
