@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"
         integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
     <script>
-        window.onload = function (){
+        window.onload = function () {
 
             var csrftoken = Cookies.get('csrftoken');
             $.ajaxSetup({
@@ -23,7 +23,7 @@
             $.ajax({
                 url: '/mock/test',
                 type: 'POST',
-                data: {prompt: "123456", first: true},
+                data: { prompt: "123456", first: true },
                 dataType: 'json',
                 success: function (data) {
                     console.log(data)
@@ -59,7 +59,7 @@
                 $.ajax({
                     url: '/mock/test',
                     type: 'POST',
-                    data: { prompt: prompt, first : false },
+                    data: { prompt: prompt, first: false },
                     dataType: 'json',
                     success: function (data) {
                         console.log(data)
@@ -69,29 +69,52 @@
             });
         }); 
     </script>
+    <style>
+        .btn1 {
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+            /* Equal width for all buttons */
+        }
+
+        .btn-primary1 {
+            background-color: #ff0000;
+            color: #fff;
+            width: 10%;
+            margin-left: 20px;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container p-3">
-        <h3>ChatGPT Clone</h3>
+        <div class="d-grid gap-2">
+            <h3>模擬面試 (文字版)</h3>
+        </div>
         <div class="mb-3">
             <form method="post">
                 {% csrf_token %}
-                <label for="prompt" class="form-label"><strong>Prompt: </strong></label>
+                <label for="prompt" class="form-label"><strong>{{username}}: </strong></label>
                 <textarea class="form-control" type="textarea" id="prompt" name="prompt" rows="3"></textarea>
                 <br>
                 <button class="btn btn-primary" type="submit">Submit</button>
+                <a class="btn btn-primary" href="{% url 'mock' %}" role="button"
+                    style="background-color: #ff0000;">退出會議</a>
             </form>
         </div>
         <br>
         <div class="mb-3">
-            <h6>Response:</h6>
+            <h3>教授:</h3>
             <div class="container border overflow-auto h-50" id="response">
                 <!-- <p>(下午7:19:30) <i class="bi bi-robot"></i>: 你好，我是HCI大學的教授，可以請你簡單介紹一下你自己嗎？
 
                     分數: 70</p> -->
             </div>
-
         </div>
     </div>
 </body>

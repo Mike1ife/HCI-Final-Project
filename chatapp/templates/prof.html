@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>清華大學 資工系 賴尚宏</title>
+    <title>{{ school }} 資工系 {{ prof.cname }}</title>
     <style>
         body {
             margin: 0;
@@ -209,7 +209,7 @@
         {% block content %}
         <header>
             <span id="web-name">{{ app_name }}</span>
-            <span id="app-name">資工系 賴尚宏</span>
+            <span id="app-name">資工系 {{ prof.cname }}</span>
             <nav>
                 <ul>
                     <li id="user-info">Hello! {{ username }}</li>
@@ -223,20 +223,30 @@
             <a class="btn btn-identity" href="{% url 'identity' %}">個人資訊</a>
         </div>
         <div class="page-links">
-            <a class="btn btn-info" href="{% url 'NTHU' %}">重選教授</a>
+            <a class="btn btn-info" href="/info?s={{ school }}">重選教授</a>
         </div>
         <div class="container">
             <div class="professor">
-                <img src="https://www.cvgip2023.org/wp-content/uploads/2023/06/%E8%B3%B4%E5%B0%9A%E5%AE%8F.jpg"
-                    alt="Shang-Hong Lai">
+                <img src="{{ prof.imageurl }}"
+                    alt="HT Lin">
                 <div class="info">
-                    <h2>賴尚宏 Shang-Hong Lai</h2>
-                    <p>系所: 資工系</p>
-                    <p>實驗室: <a href="https://cv.cs.nthu.edu.tw/index.php" target="_blank">Computer Vision Lab</a>
+                    <h2>{{ prof.cname }} {{ prof.ename }}</h2>
+                    <p>系所: {{ prof.dept }}</p>
+                    <p>實驗室: 
+                        {% if prof.laburl %}
+                            <a href="{{ prof.laburl }}" target="_blank">{{ prof.lab }}</a>
+                        {% else %}
+                        {{ prof.lab }}
+                        {% endif %}
                     </p>
-                    <p>研究方向: 電腦視覺、視訊分析、多媒體技術、人臉影像處理</p>
-                    <p>教授網頁: <a href="http://www.cs.nthu.edu.tw/~lai/"
-                            target="_blank">http://www.cs.nthu.edu.tw/~lai/</a>
+                    <p>
+                        <span class="research">研究專長: </span>
+                        <span class="research">{% for res in prof.research %}{{ res }}{% if not forloop.last %}、{% endif %}{% endfor %}</span>
+                    </p>
+                    <p>教授網頁: 
+                        {% if prof.personalurl %}
+                        <a href="{{ prof.personalurl }}" target="_blank">{{ prof.personalurl }}</a>
+                        {% endif %}
                     </p>
                 </div>
             </div>
@@ -247,8 +257,8 @@
             </div>
             <h2>教授評論</h2>
             <form id="feedback-form">
-                <label for="Shang_Hong_Lai">留言:</label>
-                <textarea id="Shang_Hong_Lai" name="Shang_Hong_Lai" rows="4" cols="50"></textarea>
+                <label for="{{ prof.ename_strip }}">留言:</label>
+                <textarea id="{{ prof.ename_strip }}" name="{{ prof.ename_strip }}" rows="4" cols="50"></textarea>
                 <button type="button" onclick="submitFeedback()">提交</button>
             </form>
         </div>
@@ -256,7 +266,7 @@
             // Function to submit feedback
             function submitFeedback() {
                 // Get the feedback text from the textarea
-                var feedbackText = document.getElementById("Shang_Hong_Lai").value;
+                var feedbackText = document.getElementById("{{ prof.ename_strip }}").value;
 
                 // Get the current user and timestamp
                 var currentUser = "{{ username }}"; // Use the correct variable here
@@ -270,19 +280,19 @@
                 };
 
                 // Get existing feedback from localStorage or initialize an empty array
-                var existingFeedback = JSON.parse(localStorage.getItem("Shang_Hong_Lai")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Add new feedback to the array
                 existingFeedback.push(feedbackObject);
 
                 // Save the updated feedback array to localStorage
-                localStorage.setItem("Shang_Hong_Lai", JSON.stringify(existingFeedback));
+                localStorage.setItem("{{ prof.ename_strip }}", JSON.stringify(existingFeedback));
 
                 // Update the displayed feedback on the page
                 displayFeedback(feedbackObject);
 
                 // Clear the textarea
-                document.getElementById("Shang_Hong_Lai").value = "";
+                document.getElementById("{{ prof.ename_strip }}").value = "";
             }
 
             // Function to display feedback on the page
@@ -317,7 +327,7 @@
             // Function to load feedback from localStorage
             function loadFeedbackFromLocalStorage() {
                 // Get existing feedback from localStorage
-                var existingFeedback = JSON.parse(localStorage.getItem("Shang_Hong_Lai")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Get the feedback-list element
                 var feedbackList = document.getElementById("feedback-list");
@@ -335,7 +345,7 @@
             // Function to delete feedback
             function deleteFeedback(element, feedbackObject) {
                 // Get existing feedback from localStorage
-                var existingFeedback = JSON.parse(localStorage.getItem("Shang_Hong_Lai")) || [];
+                var existingFeedback = JSON.parse(localStorage.getItem("{{ prof.ename_strip }}")) || [];
 
                 // Find the index of the feedback object in the array
                 var index = existingFeedback.findIndex(function (feedback) {
@@ -352,7 +362,7 @@
                     element.remove();
                     existingFeedback.splice(index, 1);
                     // Save the updated feedback array to localStorage
-                    localStorage.setItem("Shang_Hong_Lai", JSON.stringify(existingFeedback));
+                    localStorage.setItem("{{ prof.ename_strip }}", JSON.stringify(existingFeedback));
                 }
             }
             // Load existing feedback when the page loads
