@@ -1,25 +1,37 @@
-from django.shortcuts import render, redirect
-from .forms import UserForm, ResumeForm
+import openai
+import os
+import copy
+import requests
+import multiprocessing
+import sys
+import speech_recognition as sr
+import subprocess
+
+from dotenv import load_dotenv
+from pydub import AudioSegment
+from playsound import playsound
+from bs4 import BeautifulSoup
+from datetime import date, timedelta
+
+
+from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from datetime import date, timedelta
-from .models import QuestionAnswer, UserProfile
-import openai
-from dotenv import load_dotenv
-import os
-import copy
-from bs4 import BeautifulSoup
-import requests
+from django.shortcuts import render, redirect
+from django.core.files.storage import default_storage
+
+from .forms import UserForm, ResumeForm
 from .prof import NTU_prof, NYCU_prof, NTHU_prof
-import multiprocessing
-import sys
+from .models import QuestionAnswer, UserProfile
+
+
+r = sr.Recognizer()
 
 load_dotenv()
 
 # Create your views here.
-openai.api_key = os.getenv("API_KEY")
+api_key = os.getenv("API_KEY")
 
 app_name = "HCI Project"
 
@@ -181,16 +193,73 @@ def info(request):
             return render(request, "prof.html", context)
 
 
+# speech to text function, which takes in a file name and returns the text
+def speech_to_text(file_name):
+    with sr.AudioFile(file_name) as source:
+        audio_data = r.record(source)
+        text = r.recognize_google(audio_data, language="zh-TW")
+        return text
+
+
+def webm2wav():
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        "temp_recording/user_recording.webm",
+        "-c:a",
+        "pcm_f32le",
+        "temp_recording/webm2wav.wav",
+    ]
+    subprocess.run(command)
+
+
+def wav2mp3():
+    sound = AudioSegment.from_wav("temp_recording/webm2wav.wav")
+    if os.path.exists("temp_recording/wav2mp3.mp3"):
+        os.remove("temp_recording/wav2mp3.mp3")
+    sound.export("temp_recording/wav2mp3.mp3", format="mp3")
+
+
+def mp32wav():
+    sound = AudioSegment.from_mp3("temp_recording/wav2mp3.mp3")
+    if os.path.exists("temp_recording/mp32wav.mp3"):
+        os.remove("temp_recording/mp32wav.mp3")
+    sound.export("temp_recording/mp32wav.wav", format="wav")
+
+
 def mock(request):
     username = request.user.username
     context = {"username": username, "app_name": app_name}
 
     if request.method == "POST":
         audio_file = request.FILES["audioFile"]
-        # For example, save the file
-        with open("recorded_audio.wav", "wb") as destination:
-            for chunk in audio_file.chunks():
-                destination.write(chunk)
+        if os.path.exists("temp_recording/user_recording.webm"):
+            os.remove("temp_recording/user_recording.webm")
+        default_storage.save("temp_recording/user_recording.webm", audio_file)
+        webm2wav()
+        wav2mp3()
+        mp32wav()
+        speechtext = speech_to_text("temp_recording/mp32wav.wav")
+        response = ask_openai(
+            speechtext, user=request.user, first=(request.POST.get("first") == "true")
+        )
+
+        client = openai.OpenAI(api_key=api_key)
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="echo",
+            input=response,
+        )
+
+        if os.path.exists("temp_recording/response.mp3"):
+            os.remove("temp_recording/response.mp3")
+        response.stream_to_file("temp_recording/response.mp3")
+
+        # tts = gtts.gTTS(response, lang="zh-TW")
+        # tts.save("temp_recording/response.mp3")
+
+        playsound("temp_recording/response.mp3")
 
     return render(request, "mock.html", context)
 
@@ -218,48 +287,6 @@ def identity(request):
         "language_skills": profile.language_skills,
     }
     return render(request, "identity.html", context)
-
-
-@login_required(login_url="signin")
-def edit_resume(request):
-    username = request.user.username
-    user = User.objects.get(username=username)
-    profile = UserProfile.objects.get(user=user)
-    if request.method == "POST":
-        form = ResumeForm(request.POST)
-        if form.is_valid():
-            # Access user information from the form data
-            research_area = form.cleaned_data["research_area"]
-            education = form.cleaned_data["education"]
-            key_skills = form.cleaned_data["key_skills"]
-            work_experiences = form.cleaned_data["work_experiences"]
-            relevant_coursework = form.cleaned_data["relevant_coursework"]
-            extracurricular = form.cleaned_data["extracurricular"]
-            language_skills = form.cleaned_data["language_skills"]
-            profile.research_area = research_area
-            profile.education = education
-            profile.key_skills = key_skills
-            profile.work_experiences = work_experiences
-            profile.relevant_coursework = relevant_coursework
-            profile.extracurricular = extracurricular
-            profile.language_skills = language_skills
-            profile.save()
-            return redirect("identity")
-    else:
-        initial = {
-            "research_area": profile.research_area,
-            "education": profile.education,
-            "key_skills": profile.key_skills,
-            "work_experiences": profile.work_experiences,
-            "relevant_coursework": profile.relevant_coursework,
-            "extracurricular": profile.extracurricular,
-            "language_skills": profile.language_skills,
-        }
-        if profile.research_area != "請輸入您的研究領域":
-            form = ResumeForm(initial)
-        else:
-            form = ResumeForm()
-    return render(request, "resume.html", {"form": form})
 
 
 @login_required(login_url="signin")
@@ -374,7 +401,8 @@ def ask_openai(message, user=None, first=False):
 
     print("Message generating...")
 
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=history[user],
     )

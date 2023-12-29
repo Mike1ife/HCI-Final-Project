@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -168,6 +169,7 @@
     </form>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
+    <script src="{% static 'js/fix-webm-duration.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var recordButton = document.getElementById('circleButton');
@@ -176,48 +178,63 @@
             var chunks = [];
             var recordedAudioElement = document.getElementById('recordedAudio');
 
+            var startTime;
+
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
                     mediaRecorder = new MediaRecorder(stream);
 
                     mediaRecorder.ondataavailable = function (e) {
-                        if (e.data.size > 0) {
+                        if (e && e.data.size > 0) {
                             chunks.push(e.data);
                         }
                     };
 
                     mediaRecorder.onstop = function () {
-                        var audioBlob = new Blob(chunks, { type: 'audio/wav' });
+                        var duration = Date.now() - startTime;
+                        var audioBlob = new Blob(chunks, { type: 'audio/webm' });
 
-                        // Convert Blob to File
-                        var audioFile = new File([audioBlob], 'recorded_audio.wav');
+                        console.log('audioBlob:', audioBlob);
 
-                        // Create a FormData object
-                        var formData = new FormData();
-                        formData.append('audioFile', audioFile);
+                        ysFixWebmDuration(audioBlob, duration, function (fixedBlob) {
+                            console.log('fixedBlob:', fixedBlob);
+                            // Convert Blob to File
+                            var audioFile = new File([audioBlob], 'recorded_audio.webm');
 
-                        // Perform AJAX request
-                        var csrftoken = Cookies.get('csrftoken');
-                        $.ajaxSetup({
-                            headers: { 'X-CSRFToken': csrftoken }
+                            console.log('audioFile:', audioFile);
+
+
+                            // Create a FormData object
+                            var formData = new FormData();
+                            formData.append('audioFile', audioFile);
+
+                            formData.forEach(function (value, key) {
+                                console.log('FormData (after appending):' + key + ': ' + value);
+                            });
+
+                            // Perform AJAX request
+                            var csrftoken = Cookies.get('csrftoken');
+                            $.ajaxSetup({
+                                headers: { 'X-CSRFToken': csrftoken }
+                            });
+                            $.ajax({
+                                url: '/mock/',
+                                type: 'POST',
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: function (response) {
+                                    // Handle success, if needed
+                                    console.log('Audio file uploaded successfully');
+                                },
+                                error: function (xhr, status, error) {
+                                    // Handle error, if needed
+                                    console.error('Error uploading audio file:', error);
+                                }
+                            });
+
+                            chunks = [];
                         });
-                        $.ajax({
-                            url: '/mock/',
-                            type: 'POST',
-                            data: formData,
-                            contentType: false,
-                            processData: false,
-                            success: function (data) {
-                                // Handle success, if needed
-                                console.log('Audio file uploaded successfully:', data);
-                            },
-                            error: function (xhr, status, error) {
-                                // Handle error, if needed
-                                console.error('Error uploading audio file:', error);
-                            }
-                        });
-
-                        chunks = [];
                     };
 
 
@@ -232,6 +249,8 @@
                             mediaRecorder.start();
                             recordButton.classList.add('recording');
                             recordButton.textContent = 'Stop';
+
+                            startTime = Date.now();
                         }
 
                         // Toggle recording state
