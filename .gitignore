@@ -4,4 +4,5 @@
 *.pyc
 */run.sh
 ./chatapp/migrations/*
-./temp_recording/*
+temp_recording/*
+!temp_recording/.gitkeep
