@@ -12,4 +12,6 @@ python manage.py makemigrations chatapp
 python manage.py migrate
 python manage.py runserver 
 
+If you encounter error: 指定的裝置未開啟,或無法由 mci 所辨認
+This can help: https://blog.csdn.net/weixin_50836014/article/details/122135430
 ~~~
