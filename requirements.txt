@@ -3,3 +3,6 @@ django
 python-dotenv
 beautifulsoup4
 requests
+SpeechRecognition
+pydub
+playsound
