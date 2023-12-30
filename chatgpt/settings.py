@@ -25,7 +25,6 @@ SECRET_KEY = "django-insecure-8sb0iz2gkfzg(f!sj&hj1&q2_0@-*!^m#3_7^wtc@5+=os#x^2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
 ALLOWED_HOSTS = ["hci.ebg.tw"]
 CSRF_TRUSTED_ORIGINS = ['https://hci.ebg.tw']
 
@@ -118,8 +117,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
-
-STATICFILES_DIRS = [BASE_DIR / "chatapp" / "static"]
+print(BASE_DIR)
+STATICFILES_DIRS = [BASE_DIR / "chatapp" / "static", BASE_DIR / "temp_recording"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
