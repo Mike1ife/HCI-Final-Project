@@ -9,12 +9,13 @@ import speech_recognition as sr
 
 from dotenv import load_dotenv
 from pydub import AudioSegment
+from pydub.playback import play
 from playsound import playsound
 from bs4 import BeautifulSoup
 from datetime import date, timedelta
 
 
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -241,12 +242,13 @@ def mock(request):
         transcript = client.audio.transcriptions.create(
             model="whisper-1", file=audio_file, response_format="text"
         )
-
+        print(transcript)
+        print("Feeding ChatGPT")
         # Feed ChatGPT
         response = ask_openai(
             transcript, user=request.user, first=(request.POST.get("first") == "true")
         )
-
+        print("Text to speech")
         # Text to Speech
         response = client.audio.speech.create(
             model="tts-1",
@@ -257,11 +259,19 @@ def mock(request):
             os.remove("temp_recording/response.mp3")
         response.stream_to_file("temp_recording/response.mp3")
 
+        
         # tts = gtts.gTTS(response, lang="zh-TW")
         # tts.save("temp_recording/response.mp3")
+        print("Playing sound")
+        # playsound("temp_recording/response.mp3")
+        # sound = AudioSegment.from_mp3('temp_recording/response.mp3')
+        # play(sound)
+        # return JsonResponse({'audioUrl': '/temp_recording/response.mp3'})
+        audio_url = request.build_absolute_uri('/static/temp_recording/response.mp3')
 
-        playsound("temp_recording/response.mp3")
-
+        return JsonResponse({'audioUrl': audio_url})
+        
+        
     return render(request, "mock.html", context)
 
 
@@ -392,8 +402,8 @@ def signout(request):
 def ask_openai(message, user=None, first=False):
     if user not in history:
         history[user] = copy.deepcopy(default_history)
-    print("User: " + str(user))
-    print(history[user])
+    # print("User: " + str(user))
+    # print(history[user])
 
     # Add message to history
 

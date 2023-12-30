@@ -3,6 +3,7 @@
 <html lang="en">
 
 <head>
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}">
     <meta charset="UTF-8">
     <title>模擬面試</title>
     <style>
@@ -55,7 +56,11 @@
             padding-top: 0px;
             /* Adjust the top padding as needed */
         }
-
+        .audio-hidden {
+            position: absolute;
+            left: -1000px;
+            top: -1000px;
+        }
         .btn {
             text-decoration: none;
             padding: 10px;
@@ -161,7 +166,7 @@
             src="https://www.smartlinkin.com.tw/data/Article/2928/Article_4d43b0ba16dd8b2e3595a93.jpg?v=20181126001"
             alt="Centered Image">
         <button id="circleButton">Record</button>
-        <audio id="recordedAudio" controls style="display:none;"></audio>
+        <audio id="recordedAudio" class="audio-hidden" controls><source id="recordedAudioSource", src="{% static 'response.mp3' %}", type="audio/mpeg"></source></audio>
     </div>
     <form id="audioForm" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -225,6 +230,13 @@
                                 processData: false,
                                 success: function (response) {
                                     // Handle success, if needed
+                                    var audioUrl = response.audioUrl;
+                                    if (audioUrl) {
+                                        var recordedAudioSource = document.getElementById('recordedAudioSource');
+                                        // recordedAudioSource.src = audioUrl;
+                                        recordedAudioElement.load();
+                                        recordedAudioElement.play(); 
+                                    }
                                     console.log('Audio file uploaded successfully');
                                 },
                                 error: function (xhr, status, error) {
