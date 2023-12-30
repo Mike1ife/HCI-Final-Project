@@ -3,4 +3,5 @@
 **/__pycache__/
 *.pyc
 */run.sh
-/chatapp/migrations/*
+./chatapp/migrations/*
+./temp_recording/*
