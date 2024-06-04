@@ -101,7 +101,7 @@ def NYCU_worker(data):
 def NTU_parse():
     sys.setrecursionlimit(25000)
     url = "https://csie.ntu.edu.tw/zh_tw/member/Faculty"
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
     links = soup.find_all("span", class_="i-member-value member-data-value-name")
     manager = multiprocessing.Manager()
@@ -116,7 +116,7 @@ def NTU_parse():
 def NYCU_parse():
     sys.setrecursionlimit(25000)
     url = "https://www.cs.nycu.edu.tw/members/prof"
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
     members = soup.find_all("a", class_="card-image")
     manager = multiprocessing.Manager()
@@ -135,7 +135,7 @@ def NTHU_parse():
             "https://dcs.site.nthu.edu.tw/app/index.php?Action=mobileloadmod&Type=mobile_rcg_mstr&Nbr="
             + nbr
         )
-        response = requests.get(url)
+        response = requests.get(url, verify=False)
         soup = BeautifulSoup(response.text, "html.parser")
         profs = soup.find_all("div", class_="meditor")
         for prof in profs:
