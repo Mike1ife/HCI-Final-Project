@@ -6,7 +6,7 @@ User-Centered Design for graduate prospective students to prepare for admission 
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Method](#method)
+- [Methods](#methods)
 - [Demo](#demo)
 - [License](#license)
 
@@ -39,7 +39,7 @@ If you encounter error: 指定的裝置未開啟,或無法由 mci 所辨認
 This can help: https://blog.csdn.net/weixin_50836014/article/details/122135430
 ```
 
-## Method
+## Methods
 
 ## Demo
 https://github.com/Mike1ife/HCI-Final-Project/assets/132564989/87781e38-2211-4bda-9994-89c64ea00984
