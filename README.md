@@ -45,4 +45,4 @@ This can help: https://blog.csdn.net/weixin_50836014/article/details/122135430
 https://github.com/Mike1ife/HCI-Final-Project/assets/132564989/87781e38-2211-4bda-9994-89c64ea00984
 
 ## License
-This project is licensed under the MIT License. See the License file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Mike1ife/HCI-Final-Project/blob/main/LICENSE) file for more details.
