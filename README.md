@@ -1,4 +1,4 @@
-# HCI-Final-Project
+# HCI Capstone Project
 
 User-Centered Design for graduate prospective students to prepare for admission interviews
 
